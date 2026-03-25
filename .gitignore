@@ -1,0 +1,9 @@
+# Go Specific
+bin/
+
+# AI Tooling
+.claude
+.cursor
+
+# Local Docs
+docs
