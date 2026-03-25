@@ -4,6 +4,8 @@ bin/
 # AI Tooling
 .claude
 .cursor
+CLAUDE.md
+AGENTS.md
 
 # Local Docs
 docs
