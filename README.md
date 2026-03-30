@@ -1,6 +1,10 @@
 # clanchor
 
-> **Under active development — not yet ready for production use.**
+[![CI](https://github.com/valon-loshaj/clanchor/actions/workflows/ci.yml/badge.svg)](https://github.com/valon-loshaj/clanchor/actions/workflows/ci.yml)
+[![Go](https://img.shields.io/github/go-mod/go-version/valon-loshaj/clanchor)](https://go.dev/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
+> **Alpha — the CLI interface, marker format, and lock file format may still change.**
 
 Version and distribute your CLAUDE.md files. Think `npm install` but for Claude context.
 
@@ -100,7 +104,16 @@ New marker files are picked up automatically on any `clanchor install` with no `
 
 ## Setting up a registry
 
-A registry is just a GitHub repo. Organize your CLAUDE.md files in directories and tag them:
+A registry is just a GitHub repo. Create one, organize your CLAUDE.md files in directories, and tag them.
+
+### 1. Create the registry repo
+
+```bash
+mkdir claude-registry && cd claude-registry
+git init && gh repo create your-username/claude-registry --public --source=.
+```
+
+### 2. Add context files
 
 ```
 mycontext/
@@ -112,15 +125,30 @@ mycontext/
     CLAUDE.md
 ```
 
+Each `CLAUDE.md` is a standalone context file — whatever you want Claude to know when working in a directory of that type.
+
+### 3. Tag and push
+
 Tag format is `{namespace}@{version}`:
 
 ```bash
+git add . && git commit -m "initial context files"
 git tag "mycontext/go-backend@1.0.0"
 git tag "mycontext/react-frontend@1.0.0"
-git push origin --tags
+git tag "mycontext/python-scripts@1.0.0"
+git push origin main --tags
 ```
 
-That's your registry. Point your marker files at it and you're good to go. It can be public, private, or internal to your org. If `gh` can read it, clanchor can resolve from it.
+### 4. Use it
+
+Point your marker files at the registry and run `clanchor install`. The registry can be public, private, or internal to your org — if `gh` can read it, clanchor can resolve from it.
+
+To publish a new version, update the CLAUDE.md, commit, tag with the new version, and push:
+
+```bash
+git tag "mycontext/go-backend@1.1.0"
+git push origin --tags
+```
 
 ## What the output looks like
 
@@ -141,6 +169,22 @@ WARN resolve failed namespace=mycontext/missing version=1.0.0 error="tag not fou
 INFO install complete resolved=2 unchanged=0 skipped=0 failed=1
 ```
 
+## Using clanchor with AI agents
+
+clanchor is designed to work with AI coding agents like Claude Code. The [AGENTS.md](AGENTS.md) file contains a machine-readable reference that agents can use to operate clanchor correctly.
+
+If you're setting up a project where Claude Code should be able to run clanchor, add this to your project's CLAUDE.md:
+
+```
+This project uses clanchor for CLAUDE.md management.
+Run `clanchor install` to fetch context files.
+Run `clanchor install --update` after version changes in clanchor.json files.
+```
+
+## Architecture
+
+For contributors: see [CLAUDE.md](CLAUDE.md) for the full architecture overview and conventions. The install pipeline is a linear 7-step process, and the primary extension point is the `Resolver` interface in `internal/resolver`.
+
 ## Status
 
-Putzing...
+Alpha — under active development. The install pipeline works end-to-end, but the CLI interface, marker format, and lock file format may still change before v1.0.
