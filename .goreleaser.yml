@@ -21,6 +21,15 @@ archives:
 checksum:
   name_template: "checksums.txt"
 
+brews:
+  - repository:
+      owner: valon-loshaj
+      name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
+    homepage: https://github.com/valon-loshaj/clanchor
+    description: Version and distribute your CLAUDE.md files
+    license: MIT
+
 release:
   github:
     owner: valon-loshaj

@@ -30,23 +30,37 @@ clanchor fixes this. You maintain your CLAUDE.md files in one place, version the
 
 ## Installation
 
-Grab the latest binary from the [releases page](https://github.com/valon-loshaj/clanchor/releases) and drop it on your `PATH`:
+### Homebrew (macOS)
+
+```bash
+brew install valon-loshaj/tap/clanchor
+```
+
+### Go install
+
+```bash
+go install github.com/valon-loshaj/clanchor/cmd/clanchor@latest
+```
+
+### Binary download
+
+Grab the latest binary from the [releases page](https://github.com/valon-loshaj/clanchor/releases):
 
 ```bash
 # macOS (Apple Silicon)
-curl -L https://github.com/valon-loshaj/clanchor/releases/latest/download/clanchor-darwin-arm64 -o /usr/local/bin/clanchor
-chmod +x /usr/local/bin/clanchor
+curl -L https://github.com/valon-loshaj/clanchor/releases/latest/download/clanchor-darwin-arm64.tar.gz | tar xz
+sudo mv clanchor /usr/local/bin/
 
 # macOS (Intel)
-curl -L https://github.com/valon-loshaj/clanchor/releases/latest/download/clanchor-darwin-amd64 -o /usr/local/bin/clanchor
-chmod +x /usr/local/bin/clanchor
+curl -L https://github.com/valon-loshaj/clanchor/releases/latest/download/clanchor-darwin-amd64.tar.gz | tar xz
+sudo mv clanchor /usr/local/bin/
 
 # Linux (amd64)
-curl -L https://github.com/valon-loshaj/clanchor/releases/latest/download/clanchor-linux-amd64 -o /usr/local/bin/clanchor
-chmod +x /usr/local/bin/clanchor
+curl -L https://github.com/valon-loshaj/clanchor/releases/latest/download/clanchor-linux-amd64.tar.gz | tar xz
+sudo mv clanchor /usr/local/bin/
 ```
 
-Check that it works:
+Verify:
 
 ```bash
 clanchor --help
