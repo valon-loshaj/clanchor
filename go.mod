@@ -1,6 +1,6 @@
 module github.com/valon-loshaj/clanchor
 
-go 1.24.5
+go 1.26.1
 
 require github.com/spf13/cobra v1.10.2
 
