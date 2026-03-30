@@ -33,7 +33,8 @@ clanchor fixes this. You maintain your CLAUDE.md files in one place, version the
 ### Homebrew (macOS)
 
 ```bash
-brew install valon-loshaj/tap/clanchor
+brew tap valon-loshaj/tap
+brew install clanchor
 ```
 
 ### Go install
