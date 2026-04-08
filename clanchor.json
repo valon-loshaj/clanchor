@@ -1,7 +1,13 @@
 {
   "version": 2,
   "registry": "valon-loshaj/claude-md-registry",
-  "packages": [],
+  "packages": [
+    {
+      "name": "clanchor/example-skills",
+      "version": "0.1.0",
+      "scope": "project"
+    }
+  ],
   "claude_md": [
     {
       "path": ".",

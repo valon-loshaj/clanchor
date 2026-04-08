@@ -1,6 +1,23 @@
 {
   "version": 2,
-  "packages": [],
+  "packages": [
+    {
+      "name": "clanchor/example-skills",
+      "version": "0.1.0",
+      "registry": "valon-loshaj/claude-md-registry",
+      "scope": "project",
+      "files": [
+        {
+          "path": ".claude/commands/check.md",
+          "hash": "sha256:9f7be47ea57af8759bcdd2149363ce27ba053913c96d825fbf6aa5afeca744d5"
+        },
+        {
+          "path": ".claude/skills/code-review/SKILL.md",
+          "hash": "sha256:b3ec8c7a5f2bd97221ca0d86f523125e68c9df0fd940dba82db3a89861272f51"
+        }
+      ]
+    }
+  ],
   "claude_md": [
     {
       "path": ".",
