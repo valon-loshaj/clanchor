@@ -11,10 +11,12 @@ import (
 func main() {
 	root := &cobra.Command{
 		Use:   "clanchor",
-		Short: "Manage CLAUDE.md files across large, multi-service codebases",
+		Short: "Package manager for .claude directories",
 	}
 
 	root.AddCommand(newInstallCmd())
+	root.AddCommand(newStatusCmd())
+	root.AddCommand(newRemoveCmd())
 
 	if err := root.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
@@ -27,12 +29,33 @@ func newInstallCmd() *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "install",
-		Short: "Resolve and install CLAUDE.md files from the registry",
+		Short: "Resolve and install packages and CLAUDE.md files from the registry",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runInstall(update, &resolver.GitHubResolver{})
+			return runInstallV2(update, &resolver.GitHubResolver{})
 		},
 	}
 
-	cmd.Flags().BoolVar(&update, "update", false, "Reconcile drift between marker files and lock file")
+	cmd.Flags().BoolVar(&update, "update", false, "Reconcile drift between manifest and lock file")
 	return cmd
+}
+
+func newStatusCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "status",
+		Short: "Show installed packages and detect drift",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runStatus()
+		},
+	}
+}
+
+func newRemoveCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "remove <package>",
+		Short: "Remove a package from manifest and delete its files",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runRemove(args[0])
+		},
+	}
 }

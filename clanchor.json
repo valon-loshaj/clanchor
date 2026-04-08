@@ -1,5 +1,42 @@
 {
-  "namespace": "clanchor/project",
-  "version": "0.1.0",
-  "registry": "valon-loshaj/claude-md-registry"
+  "version": 2,
+  "registry": "valon-loshaj/claude-md-registry",
+  "packages": [],
+  "claude_md": [
+    {
+      "path": ".",
+      "namespace": "clanchor/project",
+      "version": "0.1.0"
+    },
+    {
+      "path": "cmd/clanchor",
+      "namespace": "clanchor/cli",
+      "version": "0.1.0"
+    },
+    {
+      "path": "internal/crawler",
+      "namespace": "clanchor/crawler",
+      "version": "0.1.0"
+    },
+    {
+      "path": "internal/lockfile",
+      "namespace": "clanchor/lockfile",
+      "version": "0.1.0"
+    },
+    {
+      "path": "internal/model",
+      "namespace": "clanchor/model",
+      "version": "0.1.0"
+    },
+    {
+      "path": "internal/resolver",
+      "namespace": "clanchor/resolver",
+      "version": "0.1.0"
+    },
+    {
+      "path": "internal/writer",
+      "namespace": "clanchor/writer",
+      "version": "0.1.0"
+    }
+  ]
 }

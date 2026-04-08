@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"os/exec"
 	"strings"
+
+	"github.com/valon-loshaj/clanchor/internal/model"
 )
 
 // GitHubResolver fetches CLAUDE.md files from a GitHub registry repo using the gh CLI.
@@ -18,7 +20,7 @@ type ghContentsResponse struct {
 	Encoding string `json:"encoding"`
 }
 
-func (r *GitHubResolver) Resolve(namespace, version, registry string) ([]byte, string, error) {
+func (r *GitHubResolver) ResolveFile(namespace, version, registry string) ([]byte, string, error) {
 	if err := checkGHAvailable(); err != nil {
 		return nil, "", err
 	}
@@ -56,6 +58,119 @@ func checkGHAvailable() error {
 		return fmt.Errorf("gh CLI not found: install it from https://cli.github.com and run 'gh auth login'")
 	}
 	return nil
+}
+
+// ghTreeResponse is the subset of the GitHub Git Trees API response we need.
+type ghTreeResponse struct {
+	Tree []ghTreeEntry `json:"tree"`
+}
+
+type ghTreeEntry struct {
+	Path string `json:"path"`
+	Type string `json:"type"` // "blob" or "tree"
+	SHA  string `json:"sha"`
+}
+
+func (r *GitHubResolver) ResolvePackage(name, version, registry string) ([]model.ResolvedFile, error) {
+	if err := checkGHAvailable(); err != nil {
+		return nil, err
+	}
+
+	ref := name + "@" + version
+	claudeDir := name + "/.claude"
+
+	// First, get the commit SHA for the tag so we can use the Trees API.
+	refEndpoint := fmt.Sprintf("repos/%s/git/ref/tags/%s", registry, ref)
+	refOut, err := exec.Command("gh", "api", refEndpoint).Output()
+	if err != nil {
+		return nil, categorizeGHError(err, name, version, registry)
+	}
+
+	var refResp struct {
+		Object struct {
+			SHA  string `json:"sha"`
+			Type string `json:"type"`
+		} `json:"object"`
+	}
+	if err := json.Unmarshal(refOut, &refResp); err != nil {
+		return nil, fmt.Errorf("failed to parse ref response for %s@%s: %w", name, version, err)
+	}
+
+	// If the tag points to a tag object (annotated tag), dereference to the commit.
+	commitSHA := refResp.Object.SHA
+	if refResp.Object.Type == "tag" {
+		tagEndpoint := fmt.Sprintf("repos/%s/git/tags/%s", registry, commitSHA)
+		tagOut, err := exec.Command("gh", "api", tagEndpoint).Output()
+		if err != nil {
+			return nil, fmt.Errorf("failed to dereference annotated tag %s@%s: %w", name, version, err)
+		}
+		var tagResp struct {
+			Object struct {
+				SHA string `json:"sha"`
+			} `json:"object"`
+		}
+		if err := json.Unmarshal(tagOut, &tagResp); err != nil {
+			return nil, fmt.Errorf("failed to parse tag response for %s@%s: %w", name, version, err)
+		}
+		commitSHA = tagResp.Object.SHA
+	}
+
+	// Get the full tree recursively.
+	treeEndpoint := fmt.Sprintf("repos/%s/git/trees/%s?recursive=1", registry, commitSHA)
+	treeOut, err := exec.Command("gh", "api", treeEndpoint).Output()
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch tree for %s@%s: %w", name, version, err)
+	}
+
+	var treeResp ghTreeResponse
+	if err := json.Unmarshal(treeOut, &treeResp); err != nil {
+		return nil, fmt.Errorf("failed to parse tree response for %s@%s: %w", name, version, err)
+	}
+
+	// Filter to blobs under {name}/.claude/
+	prefix := claudeDir + "/"
+	var blobs []ghTreeEntry
+	for _, entry := range treeResp.Tree {
+		if entry.Type == "blob" && strings.HasPrefix(entry.Path, prefix) {
+			blobs = append(blobs, entry)
+		}
+	}
+
+	if len(blobs) == 0 {
+		return nil, fmt.Errorf("no .claude/ directory found in package %s@%s", name, version)
+	}
+
+	// Fetch each blob's content.
+	var resolved []model.ResolvedFile
+	for _, blob := range blobs {
+		blobEndpoint := fmt.Sprintf("repos/%s/git/blobs/%s", registry, blob.SHA)
+		blobOut, err := exec.Command("gh", "api", blobEndpoint).Output()
+		if err != nil {
+			return nil, fmt.Errorf("failed to fetch blob %s in %s@%s: %w", blob.Path, name, version, err)
+		}
+
+		var blobResp ghContentsResponse
+		if err := json.Unmarshal(blobOut, &blobResp); err != nil {
+			return nil, fmt.Errorf("failed to parse blob response for %s: %w", blob.Path, err)
+		}
+
+		content, err := base64.StdEncoding.DecodeString(strings.ReplaceAll(blobResp.Content, "\n", ""))
+		if err != nil {
+			return nil, fmt.Errorf("failed to decode blob %s: %w", blob.Path, err)
+		}
+
+		// Strip the package namespace prefix to get the relative path (e.g., ".claude/skills/foo/SKILL.md")
+		relativePath := strings.TrimPrefix(blob.Path, name+"/")
+
+		hash := fmt.Sprintf("sha256:%x", sha256.Sum256(content))
+		resolved = append(resolved, model.ResolvedFile{
+			RelativePath: relativePath,
+			Content:      content,
+			Hash:         hash,
+		})
+	}
+
+	return resolved, nil
 }
 
 func categorizeGHError(err error, namespace, version, registry string) error {

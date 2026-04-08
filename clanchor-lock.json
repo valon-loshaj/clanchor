@@ -1,6 +1,7 @@
 {
-  "version": 1,
-  "entries": [
+  "version": 2,
+  "packages": [],
+  "claude_md": [
     {
       "path": ".",
       "namespace": "clanchor/project",

@@ -9,3 +9,8 @@ AGENTS.md
 
 # Local Docs
 docs
+
+# Beads / Dolt files (added by bd init)
+.dolt/
+*.db
+.beads-credential-key
