@@ -24,6 +24,11 @@ var (
 	orgRepoRe = regexp.MustCompile(`^[a-zA-Z0-9._-]+/[a-zA-Z0-9._-]+$`)
 )
 
+// ValidOrgRepo reports whether s matches the org/repo format used for registries.
+func ValidOrgRepo(s string) bool {
+	return orgRepoRe.MatchString(s)
+}
+
 func ParseMarkerFile(data []byte) (MarkerFile, error) {
 	var m MarkerFile
 	if err := json.Unmarshal(data, &m); err != nil {

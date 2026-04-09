@@ -69,14 +69,20 @@ clanchor --help
 
 ## Quick start
 
-### 1. Create a manifest
+### 1. Initialize a manifest
 
-Add a `clanchor.json` at your repo root:
+From inside a git repo:
+
+```bash
+clanchor init <org>/<repo>
+```
+
+where `<org>/<repo>` is your GitHub registry repository (e.g. `acme-org/claude-registry`). This creates a `clanchor.json` at the repo root pointing to your registry. Then add packages and CLAUDE.md entries to it:
 
 ```json
 {
   "version": 2,
-  "registry": "your-username/claude-registry",
+  "registry": "acme-org/claude-registry",
   "packages": [
     {
       "name": "mycontext/go-backend",
@@ -175,6 +181,10 @@ The manifest (`clanchor.json`) lives at the repo root and declares everything cl
 
 ## Commands
 
+### `clanchor init <registry>`
+
+Initialize a new `clanchor.json` manifest at the repo root. Takes the default registry in `org/repo` format as the argument. Refuses to overwrite an existing manifest.
+
 ### `clanchor install`
 
 Resolve and install all packages and CLAUDE.md entries declared in the manifest. New entries are picked up automatically. Already-locked entries are skipped to avoid unnecessary network calls.
@@ -201,7 +211,7 @@ A registry is a GitHub repo where you publish `.claude` packages and CLAUDE.md f
 
 ```bash
 mkdir claude-registry && cd claude-registry
-git init && gh repo create your-username/claude-registry --public --source=.
+git init && gh repo create acme-org/claude-registry --public --source=.
 ```
 
 ### 2. Add packages

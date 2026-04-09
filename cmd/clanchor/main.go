@@ -14,6 +14,7 @@ func main() {
 		Short: "Package manager for .claude directories",
 	}
 
+	root.AddCommand(newInitCmd())
 	root.AddCommand(newInstallCmd())
 	root.AddCommand(newStatusCmd())
 	root.AddCommand(newRemoveCmd())
@@ -45,6 +46,18 @@ func newStatusCmd() *cobra.Command {
 		Short: "Show installed packages and detect drift",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runStatus()
+		},
+	}
+}
+
+func newInitCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "init <registry>",
+		Short: "Initialize a new clanchor manifest",
+		Long:  "Create a clanchor.json manifest at the repo root with the given default registry.",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runInit(args[0])
 		},
 	}
 }

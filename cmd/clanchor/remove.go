@@ -1,11 +1,8 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"log/slog"
-	"os"
-	"path/filepath"
 
 	"github.com/valon-loshaj/clanchor/internal/lockfile"
 	"github.com/valon-loshaj/clanchor/internal/manifest"
@@ -64,13 +61,8 @@ func runRemove(packageName string) error {
 
 	// Update manifest.
 	m.Packages = remaining
-	manifestData, err := json.MarshalIndent(m, "", "  ")
-	if err != nil {
-		return fmt.Errorf("marshaling manifest: %w", err)
-	}
-	manifestData = append(manifestData, '\n')
-	if err := os.WriteFile(filepath.Join(repoRoot, manifest.FileName), manifestData, 0o644); err != nil {
-		return fmt.Errorf("writing manifest: %w", err)
+	if err := manifest.Write(repoRoot, m); err != nil {
+		return err
 	}
 
 	// Update lock file.
